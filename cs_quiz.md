@@ -17,14 +17,6 @@ Usage
 
 To use the CS Quiz Deliverer, follow these steps:
 
-1.  Import the necessary modules by running the following lines of code:
-
-python
-
-Copy code
-
-`import csv import requests import random import textwrap`
-
 1.  Call the `cs_quiz` function with the URL of the CSV file containing the questions:
 
 ```python
@@ -43,7 +35,7 @@ The CSV file containing the questions should follow this format:
 
 ```csv
 Question 1,True
-Question 2,False \
+Question 2,False 
 Question 3,True ...
 ```
 
