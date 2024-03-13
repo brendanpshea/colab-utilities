@@ -17,16 +17,17 @@ Usage
 
 To use the CS Quiz Deliverer, follow these steps:
 
-1.  Call the `cs_quiz` function with the URL of the CSV file containing the questions:
+1. Download the cs_quiz.py file and `import` the cs_quiz function.
+2.  Call the `cs_quiz` function with the URL of the CSV file containing the questions:
 
-```python
-cs_quiz('https://example.com/questions.csv')`
-```
+  ```python
+  cs_quiz('https://example.com/questions.csv')`
+  ```
+  
+  Replace `'https://example.com/questions.csv'` with the actual URL of the CSV file.
 
-Replace `'https://example.com/questions.csv'` with the actual URL of the CSV file.
-
-1.  Answer the questions by entering "True", "False", or "Quit" when prompted.
-2.  After answering all the questions or entering "Quit", the script will display your score and the percentage of correct answers.
+3.  Answer the questions by entering "True", "False", or "Quit" when prompted.
+4.  After answering all the questions or entering "Quit", the script will display your score and the percentage of correct answers.
 
 CSV File Format
 ---------------
