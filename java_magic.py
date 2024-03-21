@@ -4,24 +4,19 @@ import tempfile
 
 @register_cell_magic
 def java(line, cell):
-    # Create a temporary file for the Java code
-    with tempfile.NamedTemporaryFile(suffix=".java", delete=False) as temp_file:
-        temp_file.write(cell.encode("utf-8"))
-        temp_file.flush()
-        temp_file_name = temp_file.name
+ # Write the Java code to a temporary file
+    with open("script.java", "w") as f:
+        f.write(cell)
     
-    # Execute the Java code using JShell
+    # Execute the Java code using JShell with quiet mode and startup file
     try:
-        process = subprocess.Popen(["jshell", "-q"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        output, error = process.communicate(input=f"/open {temp_file_name}\n/exit\n")
-        print(output)
-        if error:
-            print(f"Error:\n{error}")
+        output = subprocess.run(["jshell", "-q", "script.java"], capture_output=True, text=True, check=True)
+        print(output.stdout)
     except subprocess.CalledProcessError as e:
         print(f"Error:\n{e.stderr}")
-    finally:
-        # Clean up the temporary file
-        subprocess.run(["rm", temp_file_name], check=True)
+    
+    # Clean up the temporary file
+    subprocess.run(["rm", "script.java"], check=True)   
 
 def load_ipython_extension(ipython):
     ipython.register_magic_function(java, 'cell')
