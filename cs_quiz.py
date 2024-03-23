@@ -7,10 +7,9 @@ def read_questions(url):
     """Fetches and parses a CSV file of questions from the specified URL."""
     try:
         response = requests.get(url)
-        response.raise_for_status()  # Ensure a successful request
+        response.raise_for_status()  # Ensure the request was successful
         lines = response.text.strip().split('\n')
         reader = csv.reader(lines)
-        # Store each question and its answer as a tuple in a list
         questions = [(row[0], row[1].lower()) for row in reader if len(row) == 2]
         return questions
     except requests.exceptions.RequestException as e:
@@ -37,10 +36,12 @@ def cs_quiz(url):
         print("No questions found. Exiting the quiz.")
         return
 
+    score = 0
+    total_questions = len(questions)
     random.shuffle(questions)  # Randomize question order
 
-    for i, (question, correct_answer) in enumerate(questions, 1), total=len(questions):
-        print(f"\nQuestion {i} of {total}:")
+    for question, correct_answer in questions:
+        print(f"\nQuestion {questions.index((question, correct_answer)) + 1} of {total_questions}:")
         user_answer = ask_question(question)
 
         if user_answer == 'quit':
@@ -49,7 +50,9 @@ def cs_quiz(url):
 
         if user_answer == correct_answer:
             print("Correct!")
+            score += 1
         else:
             print(f"Incorrect. {question} is {correct_answer.upper()}.")
 
-    # Summary is omitted as no calculation or display of score is required per instructions
+    # Displaying the final score
+    print(f"\nYou answered {score} out of {total_questions} questions correctly.")
