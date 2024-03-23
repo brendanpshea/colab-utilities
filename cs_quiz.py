@@ -7,10 +7,11 @@ def read_questions(url):
     """Fetches and parses a CSV file of questions from the specified URL."""
     try:
         response = requests.get(url)
-        response.raise_for_status()  # Ensure the request was successful
+        response.raise_for_status()
         lines = response.text.strip().split('\n')
         reader = csv.reader(lines)
-        questions = [(row[0], row[1].lower()) for row in reader if len(row) == 2]
+        # Normalize boolean values to lowercase strings, ensuring format consistency.
+        questions = [(row[0], row[1].strip().lower()) for row in reader if len(row) == 2]
         return questions
     except requests.exceptions.RequestException as e:
         print(f"Error fetching the CSV file: {e}")
@@ -52,7 +53,10 @@ def cs_quiz(url):
             print("Correct!")
             score += 1
         else:
-            print(f"Incorrect. {question} is {correct_answer.upper()}.")
+            correct_statement = "TRUE" if correct_answer == "true" else "FALSE"
+            print(f"Incorrect. {question} is {correct_statement}.")
 
-    # Displaying the final score
-    print(f"\nYou answered {score} out of {total_questions} questions correctly.")
+    # Ensure score is only displayed if at least one question has been answered.
+    if user_answer != 'quit' or score > 0:
+        print(f"\nYou answered {score} out of {total_questions} questions correctly.")
+
