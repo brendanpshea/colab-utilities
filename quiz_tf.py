@@ -2,6 +2,8 @@ import csv
 import random
 import sys
 import requests
+from IPython.display import display, HTML
+import ipywidgets as widgets
 
 def convert_answer(answer):
     answer = answer.strip().lower()
@@ -79,36 +81,51 @@ def run_quiz(questions):
     total_questions = len(questions)
     random.shuffle(questions)
 
-    for i, (question, answer) in enumerate(questions, start=1):
-        print(f"\nQuestion {i} of {total_questions}: {question}")
-        user_answer = input("Enter your answer (T/F) or 'Q' to quit: ").upper()
-
-        while user_answer not in ['T', 'F', 'TRUE', 'FALSE', 'Q']:
-            user_answer = input("Invalid input. Please enter 'T', 'F', 'TRUE', 'FALSE', or 'Q' to quit: ").upper()
-
-        if user_answer == 'Q':
-            print("\nQuiz aborted.")
+    def check_answer(answer):
+        nonlocal score, i
+        if answer == 'Q':
+            display(HTML("<p>Quiz aborted.</p>"))
             print_summary(score, i - 1, total_questions)
             return
-
-        user_answer = user_answer in ['T', 'TRUE']
-
-        if user_answer == answer:
-            print("Correct!")
+        user_answer = answer == 'T'
+        if user_answer == questions[i-1][1]:
+            display(HTML("<p style='color: green;'>Correct!</p>"))
             score += 1
         else:
-            print("Incorrect!")
+            display(HTML("<p style='color: red;'>Incorrect!</p>"))
+        i += 1
+        if i <= total_questions:
+            ask_question()
+        else:
+            display(HTML("<h3>Quiz completed!</h3>"))
+            print_summary(score, total_questions, total_questions)
 
-    print("\nQuiz completed!")
-    print_summary(score, total_questions, total_questions)
+    def ask_question():
+        display(HTML(f"<h3>Question {i} of {total_questions}:</h3>"))
+        display(HTML(f"<p>{questions[i-1][0]}</p>"))
+        true_button = widgets.Button(description='True')
+        false_button = widgets.Button(description='False')
+        quit_button = widgets.Button(description='Quit')
+        true_button.on_click(lambda _: check_answer('T'))
+        false_button.on_click(lambda _: check_answer('F'))
+        quit_button.on_click(lambda _: check_answer('Q'))
+        display(widgets.HBox([true_button, false_button, quit_button]))
+
+    i = 1
+    ask_question()
 
 def print_summary(score, questions_answered, total_questions):
-    print(f"\nQuiz Summary:")
-    print(f"Questions Answered: {questions_answered}/{total_questions}")
-    print(f"Correct Answers: {score}")
-    print(f"Incorrect Answers: {questions_answered - score}")
     percentage = (score / questions_answered) * 100 if questions_answered > 0 else 0
-    print(f"Percentage: {percentage:.2f}%")
+    summary_html = f"""
+    <h3>Quiz Summary:</h3>
+    <ul>
+        <li>Questions Answered: {questions_answered}/{total_questions}</li>
+        <li>Correct Answers: {score}</li>
+        <li>Incorrect Answers: {questions_answered - score}</li>
+        <li>Percentage: {percentage:.2f}%</li>
+    </ul>
+    """
+    display(HTML(summary_html))
 
 def run_quiz_local(csv_file_path):
     if not validate_csv(csv_file_path):
