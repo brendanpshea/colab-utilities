@@ -115,37 +115,18 @@ def sql_select_quiz(db_path, questions, answers):
             
 
         def submit_query(button):
-            """
-            Handles the submission of the user's query and compares it to the correct answer.
-            """
-            try:
-                user_query = text_area.value
-                user_result = pd.read_sql_query(user_query, conn)
-                correct_query = answers[question_index]
-                correct_result = pd.read_sql_query(correct_query, conn)
-
-                if user_result.equals(correct_result):
-                    feedback = "<div style='color: green;'><strong>Correct!</strong> Your query produced the expected result.</div>"
-                    submit_button.layout.visibility = 'hidden'
-                    next_button.layout.visibility = 'visible'
-                else:
-                    feedback = "<div style='color: red;'><strong>Incorrect.</strong> Please try again.</div>"
-                    retry_button.layout.visibility = 'visible'
-                    submit_button.layout.visibility = 'hidden'
-                display(HTML(feedback))
-
-                display(HTML("<h4>Your Results (first five):</h4>"))
-                display(user_result.head())
-                display(HTML("<h4>Expected Results (first five):</h4>"))
-                display(correct_result.head())
-
-            except Exception as e:
-                display(HTML(f"<div>Error executing your query: {str(e)}</div>"))
-
-        def submit_query(button):
           """
           Handles the submission of the user's query and compares it to the correct answer.
           """
+          user_query = text_area.value.strip()  # Remove leading/trailing whitespace
+
+          if not user_query.lower().startswith('select'):
+              clear_output(wait=True)  # Clear the old output
+              display(HTML(render_table_schemas(get_table_schemas(conn))))  # Display the schema again
+              display(HTML(f"<h3>SQL Question {question_index + 1}:</h3><p>{questions[question_index]}</p>"))  # Display the question
+              display(query_widget)  # Display the query widget
+              display(HTML("<div style='color: red;'><strong>Error:</strong> Please enter a valid SELECT query.</div>"))
+              return
           try:
               user_query = text_area.value
               user_result = pd.read_sql_query(user_query, conn)
