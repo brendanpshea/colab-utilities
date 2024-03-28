@@ -40,7 +40,7 @@
     "answer": "SELECT * FROM Students WHERE FirstName LIKE 'L%';"
   },
   {
-    "question": "Count the number of students in the database.",
+    "question": "Count the number of students in the database and call the result  \"Number of Students\".",
     "answer": "SELECT COUNT(*) AS \"Number of Students\" FROM Students;"
   },
   {
@@ -68,7 +68,7 @@
     "answer": "SELECT * FROM Students WHERE GPA = (SELECT MAX(GPA) FROM Students);"
   },
   {
-    "question": "Find the total number of students enrolled in classes taught by Obi-Wan Kenobi.",
+    "question": "Find the total number of students enrolled in classes taught by Obi-Wan Kenobi. Call the result \"Students with Obi-Wan\".",
     "answer": "SELECT COUNT(*) AS \"Students with Obi-Wan\" FROM Students NATURAL JOIN Enrollment NATURAL JOIN Classes WHERE Classes.MasterName = 'Obi-Wan Kenobi';"
   },
   {
@@ -76,7 +76,7 @@
     "answer": "SELECT Students.FirstName, Students.LastName, Enrollment.EnrollmentDate FROM Students NATURAL JOIN Enrollment NATURAL JOIN Classes WHERE Classes.ClassName = 'Jedi Mind Tricks';"
   },
   {
-    "question": "Show the class names and the average GPA of students enrolled in each class.",
+    "question": "Show the class names and the average GPA of students enrolled in each class. Call the result \"Average GPA\"",
     "answer": "SELECT Classes.ClassName, AVG(Students.GPA) AS \"Average GPA\" FROM Students NATURAL JOIN Enrollment NATURAL JOIN Classes GROUP BY Classes.ClassID;"
   }
 ]
