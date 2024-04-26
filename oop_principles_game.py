@@ -25,14 +25,17 @@ statements = {
         "The ponies in Equestria can have different roles and abilities while still being considered ponies.",
         "He-Man and She-Ra's classes implement a common interface for wielding their respective weapons."
     ],
+    
     "Abstraction": [
-    "Pokémon battles are simulated using a turn-based system, ignoring many of the details of of real-time combat.",
-    "Sonic's world is divided into distinct zones, each with its own unique theme and challenges, simplifying the game's progression.",
-    "The Animaniacs' skits are divided into separate segments, each focusing on a specific theme or storyline, without too much concern about the overall narrative.",
-    "Tiny Titans characters communicate through speech bubbles, doing away with the need for voice acting or complex dialogue systems.",
-    "The Elements of Harmony in My Little Pony represent abstract concepts like honesty, kindness, and loyalty, simplifying the representation of virtues.",
-    "He-Man's transformation sequence simplifies the process of gaining his powers, focusing on the key elements of raising his sword and reciting the oath."
-],
+    "In Pokémon, the characters' personalities and relationships are represented through simplified dialogue and animations, focusing on key traits rather than full backstories.",
+    "Sonic's movements and abilities are portrayed using streamlined physics and exaggerated animations, emphasizing gameplay fluidity over strict realism.",
+    "The Animaniacs' world is a simplified, satirical version of real-world Hollywood, featuring caricatures of celebrities and the entertainment industry.",
+    "The art style in Tiny Titans simplifies the characters' appearances, using minimalistic designs and exaggerated features to convey their personalities.",
+    "The world of My Little Pony is a fantasized representation of real-world locations and societies, using magical elements to explore themes and moral lessons.",
+    "He-Man's universe presents a clear distinction between good and evil, using archetypal characters and storylines to represent moral concepts.",
+]
+    
+    ,
     "Badness": [
         "Team Rocket's class directly modifies the private attributes of Ash's Pokemon without proper encapsulation.",
         "Dr. Eggman's class has a single massive method that handles all his evil plans, lacking proper organization.",
