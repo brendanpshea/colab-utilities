@@ -27,11 +27,11 @@ statements = {
     ],
     "Abstraction": [
     "Pokémon battles are simulated using a turn-based system, ignoring many of the details of of real-time combat.",
-    "Sonic's world is divided into distinct zones, each with its own unique theme and challenges, abstracting the game's progression.",
-    "The Animaniacs' skits are divided into separate segments, each focusing on a specific theme or storyline, abstracting the overall narrative.",
-    "Tiny Titans characters communicate through speech bubbles, abstracting away the need for voice acting or complex dialogue systems.",
+    "Sonic's world is divided into distinct zones, each with its own unique theme and challenges, simplifying the game's progression.",
+    "The Animaniacs' skits are divided into separate segments, each focusing on a specific theme or storyline, without too much concern about the overall narrative.",
+    "Tiny Titans characters communicate through speech bubbles, doing away with the need for voice acting or complex dialogue systems.",
     "The Elements of Harmony in My Little Pony represent abstract concepts like honesty, kindness, and loyalty, simplifying the representation of virtues.",
-    "He-Man's transformation sequence abstracts the process of gaining his powers, focusing on the key elements of raising his sword and reciting the oath."
+    "He-Man's transformation sequence simplifies the process of gaining his powers, focusing on the key elements of raising his sword and reciting the oath."
 ],
     "Badness": [
         "Team Rocket's class directly modifies the private attributes of Ash's Pokemon without proper encapsulation.",
