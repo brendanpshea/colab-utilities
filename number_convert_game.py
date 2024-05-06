@@ -69,5 +69,3 @@ def number_convert_game():
         display(HTML(html_output))
     html_output = f"<h2>Congratulations! You got {score} correct answers.</h2></body></html>"
     display(HTML(html_output))
-
-number_convert_game()
