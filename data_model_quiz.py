@@ -1,7 +1,6 @@
 def logical_data_models_quiz():
     import random
-
-    statements = {
+     statements = {
         "flat": [
             "Data is stored in a single table or file.",
             "No relationships between data entities.",
@@ -18,22 +17,25 @@ def logical_data_models_quiz():
             "Data is organized into tables with rows and columns.",
             "Tables can be linked by primary and foreign keys.",
             "Supports complex queries using SQL.",
-            "Highest support for data integrity and reduced redundancy.",
+            "Ensures data integrity and reduces redundancy.",
             "Examples include MySQL and PostgreSQL.",
             "Supports ACID transactions.",
             "Normalization to eliminate redundancy.",
-            "Best for highly structured data.",
+            "Easier to maintain and update data.",
+            "Best for structured data with clear relationships.",
             "Scalable with indexing and partitioning."
         ],
         "document": [
             "Data is stored in documents, typically JSON or XML.",
             "Each document can have a flexible schema.",
             "Suitable for hierarchical and nested data.",
-            "Provides high performance for read operations.",
+            "Provides high performance for read and write operations.",
             "Examples include MongoDB and CouchDB.",
-            "Good for storing unstructured data.",
+            "Supports schema evolution without downtime.",
+            "Good for storing unstructured or semi-structured data.",
             "Enables easy horizontal scaling.",
-            "Best for content management and catalogs."
+            "Provides rich query capabilities for document-based queries.",
+            "Best for content management and catalogs where each item is unique."
         ],
         "graph": [
             "Data is represented as nodes and edges.",
@@ -41,9 +43,11 @@ def logical_data_models_quiz():
             "Enables efficient traversal of data connections.",
             "Used in social networks and recommendation systems.",
             "Examples include Neo4j and ArangoDB.",
-            "Supports advanced pathfinding algorithms.",
-            "Best for network analysis.",
-            "Scalable with graph partitioning."
+            "Supports advanced pathfinding and graph algorithms.",
+            "Good for representing highly interconnected data.",
+            "Enables real-time recommendations based on relationships.",
+            "Best for network analysis and scenarios with many-to-many relationships.",
+            "Scalable with graph partitioning to distribute nodes and edges."
         ]
     }
 
