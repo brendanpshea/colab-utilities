@@ -1,6 +1,6 @@
 def logical_data_models_quiz():
-     import random
-     statements = {
+    import random
+    statements = {
         "flat": [
             "Data is stored in a single table or file.",
             "No relationships between data entities.",
