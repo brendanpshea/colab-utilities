@@ -193,6 +193,12 @@ def sql_select_quiz(db_path, questions, answers):
 
         display_current_question()
 
+def sql_select_quiz_from_id(quiz_id="books"):
+    if quiz_id == "books":
+        db_url = "https://github.com/brendanpshea/database_sql/raw/main/data/sci_fi_books.db"
+        json_url = "https://github.com/brendanpshea/database_sql/raw/main/data/sci_fi_books.db"
+    sql_select_quiz_url(db_url,json_url)
+        
 def sql_select_quiz_url(db_url, json_url):
     """
     Launches the SQL SELECT quiz using the provided database and JSON URLs.
