@@ -38,16 +38,7 @@ class SQLQuiz:
         self.setup_ui()
 
     def setup_ui(self):
-        self.text_area = Textarea(placeholder='Type your SQL query here...', 
-                                  description='Query:', 
-                                  layout=Layout(width='60%', height='100px'))
-        self.submit_button = Button(description="Submit")
-        self.next_button = Button(description="Next Question", 
-                                  layout=Layout(visibility='hidden'))
-        self.retry_button = Button(description="Retry", 
-                                   layout=Layout(visibility='hidden'))
-        
-        # New UI elements for skipping to a specific question
+                # New UI elements for skipping to a specific question
         self.skip_input = IntText(value=1, min=1, max=len(self.questions), description='Question:')
         self.skip_button = Button(description="Skip to")
         self.skip_box = HBox([self.skip_input, self.skip_button])
@@ -59,6 +50,16 @@ class SQLQuiz:
 
         self.query_widget = VBox([self.text_area, self.submit_button, 
                                   self.retry_button, self.next_button, self.skip_box])
+        self.text_area = Textarea(placeholder='Type your SQL query here...', 
+                                  description='Query:', 
+                                  layout=Layout(width='60%', height='100px'))
+        self.submit_button = Button(description="Submit")
+        self.next_button = Button(description="Next Question", 
+                                  layout=Layout(visibility='hidden'))
+        self.retry_button = Button(description="Retry", 
+                                   layout=Layout(visibility='hidden'))
+        
+
 
     def display_current_question(self, _=None):
         clear_output(wait=True)
