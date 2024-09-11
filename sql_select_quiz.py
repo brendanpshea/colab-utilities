@@ -4,7 +4,7 @@ import requests
 import tempfile
 import json
 from IPython.display import display, HTML, clear_output
-from ipywidgets import Textarea, Button, VBox, Layout
+from ipywidgets import Textarea, Button, VBox, Layout, HBox, IntText
 
 def get_table_schemas(conn):
     cursor = conn.cursor()
@@ -46,13 +46,19 @@ class SQLQuiz:
                                   layout=Layout(visibility='hidden'))
         self.retry_button = Button(description="Retry", 
                                    layout=Layout(visibility='hidden'))
+        
+        # New UI elements for skipping to a specific question
+        self.skip_input = IntText(value=1, min=1, max=len(self.questions), description='Question:')
+        self.skip_button = Button(description="Skip to")
+        self.skip_box = HBox([self.skip_input, self.skip_button])
 
         self.submit_button.on_click(self.submit_query)
         self.next_button.on_click(self.next_question)
         self.retry_button.on_click(self.display_current_question)
+        self.skip_button.on_click(self.skip_to_question)
 
         self.query_widget = VBox([self.text_area, self.submit_button, 
-                                  self.retry_button, self.next_button])
+                                  self.retry_button, self.next_button, self.skip_box])
 
     def display_current_question(self, _=None):
         clear_output(wait=True)
@@ -65,6 +71,7 @@ class SQLQuiz:
         self.submit_button.layout.visibility = 'visible'
         self.next_button.layout.visibility = 'hidden'
         self.retry_button.layout.visibility = 'hidden'
+        self.skip_input.max = len(self.questions)
         display(self.query_widget)
 
     def submit_query(self, _):
@@ -122,7 +129,16 @@ class SQLQuiz:
             self.submit_button.layout.visibility = 'hidden'
             self.next_button.layout.visibility = 'hidden'
             self.retry_button.layout.visibility = 'hidden'
+            self.skip_box.layout.visibility = 'hidden'
             display(HTML("<div>All questions completed. Well done!</div>"))
+
+    def skip_to_question(self, _):
+        new_index = self.skip_input.value - 1
+        if 0 <= new_index < len(self.questions):
+            self.current_index = new_index
+            self.display_current_question()
+        else:
+            self.display_error(f"Invalid question number. Please enter a number between 1 and {len(self.questions)}.")
 
 def sql_select_quiz_from_id(quiz_id="books"):
     if quiz_id == "books":
