@@ -7,210 +7,130 @@ from IPython.display import display, HTML, clear_output
 from ipywidgets import Textarea, Button, VBox, Layout
 
 def get_table_schemas(conn):
-    """
-    Retrieves the schema information for all tables in the database.
-
-    Args:
-        conn (sqlite3.Connection): The database connection object.
-
-    Returns:
-        list: A list of tuples containing table names and their respective column information.
-    """
     cursor = conn.cursor()
     cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
-    tables = cursor.fetchall()
-    schemas = []
-    for table in tables:
-        table_name = table[0]
-        cursor.execute(f"PRAGMA table_info({table_name})")
-        columns = cursor.fetchall()
-        schemas.append((table_name, columns))
-    return schemas
+    return [(table[0], cursor.execute(f"PRAGMA table_info({table[0]})").fetchall()) 
+            for table in cursor.fetchall()]
 
 def render_table_schemas(schemas):
-    """
-    Renders the database schema information in a compact format with HTML formatting.
-
-    Args:
-        schemas (list): A list of tuples containing table names and their respective column information.
-
-    Returns:
-        str: The rendered HTML string representing the database schema.
-    """
-    schema_html = "<h2>Database Schema:</h2>"
-    schema_html += "<ol>"
+    schema_html = "<h2>Database Schema:</h2><ol>"
     for table_name, columns in schemas:
         column_info = ", ".join(f"{column[1]} {column[2]}" for column in columns)
         schema_html += f"<li><b>{table_name}</b> ({column_info})</li>"
     schema_html += "</ol>"
-
-    schema_html += "<h3>Sample queries</h3>"
-    sample_query = f'\"SELECT * FROM {schemas[0][0]}" returns all rows and columns from {schemas[0][0]}.'
-    schema_html += sample_query + "<br>"
-    sample_query = f'\"SELECT {schemas[0][1][1][1]} FROM {schemas[0][0]}" selects a specific column.'
-    schema_html += sample_query
+    schema_html += f"<h3>Sample queries</h3>"
+    schema_html += f'"SELECT * FROM {schemas[0][0]}" returns all rows and columns from {schemas[0][0]}.<br>'
+    schema_html += f'"SELECT {schemas[0][1][0][1]} FROM {schemas[0][0]}" selects a specific column.'
     return schema_html
 
-def validate_questions(conn, answers):
-    """
-    Validates each answer query to ensure it is executable and a SELECT statement.
+def execute_query(conn, query):
+    try:
+        return pd.read_sql_query(query, conn)
+    except Exception as e:
+        raise ValueError(f"Error executing query: {str(e)}")
 
-    Args:
-        conn (sqlite3.Connection): The database connection object.
-        answers (list): A list of SQL queries representing the answers to the questions.
+class SQLQuiz:
+    def __init__(self, db_path, questions, answers):
+        self.conn = sqlite3.connect(db_path)
+        self.questions = questions
+        self.answers = answers
+        self.current_index = 0
+        self.setup_ui()
 
-    Returns:
-        tuple: A tuple containing a boolean indicating if all queries are valid and a list of valid queries.
-    """
-    valid_queries = []
-    for i, query in enumerate(answers, start=1):
-        try:
-            if not query.strip().lower().startswith('select'):
-                raise ValueError(f"Query {i} is not a SELECT statement.")
-            conn.execute(query)
-            valid_queries.append(query)
-        except Exception as e:
-            display(HTML(f"<div style='color: red;'>Error in query {i}: {e}</div>"))
-            return False, []
-    return True, valid_queries
+    def setup_ui(self):
+        self.text_area = Textarea(placeholder='Type your SQL query here...', 
+                                  description='Query:', 
+                                  layout=Layout(width='60%', height='100px'))
+        self.submit_button = Button(description="Submit")
+        self.next_button = Button(description="Next Question", 
+                                  layout=Layout(visibility='hidden'))
+        self.retry_button = Button(description="Retry", 
+                                   layout=Layout(visibility='hidden'))
 
-def sql_select_quiz(db_path, questions, answers):
-    """
-    Iterates through a list of SQL SELECT questions, allowing the user to submit queries
-    against a provided SQLite database. Shows results and requires correct answers before proceeding.
+        self.submit_button.on_click(self.submit_query)
+        self.next_button.on_click(self.next_question)
+        self.retry_button.on_click(self.display_current_question)
 
-    Args:
-        db_path (str): Path to the SQLite database file.
-        questions (list): List of question prompts.
-        answers (list): List of correct SQL queries corresponding to each question.
-    """
-    if not questions or not answers or len(questions) != len(answers):
-        display(HTML("<div>Please provide an equal number of questions and answers.</div>"))
-        return
+        self.query_widget = VBox([self.text_area, self.submit_button, 
+                                  self.retry_button, self.next_button])
 
-    with sqlite3.connect(db_path) as conn:
-        valid, valid_answers = validate_questions(conn, answers)
-        if not valid:
-            display(HTML("<div>Please correct the errors in your SQL queries before proceeding.</div>"))
+    def display_current_question(self, _=None):
+        clear_output(wait=True)
+        schemas = get_table_schemas(self.conn)
+        display(HTML(render_table_schemas(schemas)))
+        display(HTML(f"<h3>SQL Question {self.current_index + 1}:</h3>"
+                     f"<p>{self.questions[self.current_index]}</p>"))
+        
+        self.text_area.value = ''
+        self.submit_button.layout.visibility = 'visible'
+        self.next_button.layout.visibility = 'hidden'
+        self.retry_button.layout.visibility = 'hidden'
+        display(self.query_widget)
+
+    def submit_query(self, _):
+        user_query = self.text_area.value.strip()
+        if not user_query.lower().startswith('select'):
+            self.display_error("Please enter a valid SELECT query.")
             return
 
-        question_index = 0
+        try:
+            user_result = execute_query(self.conn, user_query)
+            correct_result = execute_query(self.conn, self.answers[self.current_index])
 
-        def display_current_question():
-            """
-            Displays the current question and resets the UI for answer submission.
-            """
-            clear_output(wait=True)
-            schemas = get_table_schemas(conn)
-            display(HTML(render_table_schemas(schemas)))
-            question_html = f"<h3>SQL Question {question_index + 1}:</h3><p>{questions[question_index]}</p>"
-            display(HTML(question_html))
-            
-            text_area.value = ''
-            submit_button.layout.visibility = 'visible'
-            next_button.layout.visibility = 'hidden'
-            retry_button.layout.visibility = 'hidden'
-            display(query_widget)
+            self.display_current_question()
+            self.display_results(user_result, correct_result)
+        except ValueError as e:
+            self.display_error(str(e))
 
-        def submit_query(button):
-            """
-            Handles the submission of the user's query and compares it to the correct answer.
-            """
-            user_query = text_area.value.strip()  # Remove leading/trailing whitespace
+    def display_results(self, user_result, correct_result):
+        user_rows, user_cols = user_result.shape
+        correct_rows, correct_cols = correct_result.shape
+        count_info = (f"<div>Your query yielded {user_rows} rows and {user_cols} columns. "
+                      f"The expected result had {correct_rows} rows and {correct_cols} columns.</div>")
+        display(HTML(count_info))
 
-            if not user_query.lower().startswith('select'):
-                clear_output(wait=True)  # Clear the old output
-                display(HTML(render_table_schemas(get_table_schemas(conn))))  # Display the schema again
-                display(HTML(f"<h3>SQL Question {question_index + 1}:</h3><p>{questions[question_index]}</p>"))  # Display the question
-                display(query_widget)  # Display the query widget
-                display(HTML("<div style='color: red;'><strong>Error:</strong> Please enter a valid SELECT query.</div>"))
-                return
-            try:
-                user_query = text_area.value
-                user_result = pd.read_sql_query(user_query, conn)
-                correct_query = answers[question_index]
-                correct_result = pd.read_sql_query(correct_query, conn)
+        if user_result.equals(correct_result):
+            self.display_feedback(True)
+        else:
+            self.display_feedback(False)
 
-                clear_output(wait=True)  # Clear the old output
-                display(HTML(render_table_schemas(get_table_schemas(conn))))  # Display the schema again
-                display(HTML(f"<h3>SQL Question {question_index + 1}:</h3><p>{questions[question_index]}</p>"))  # Display the question
-                display(query_widget)  # Display the query widget
+        display(HTML("<h4>Your Results (first five):</h4>"))
+        display(user_result.head())
+        display(HTML("<h4>Expected Results (first five):</h4>"))
+        display(correct_result.head())
 
-                # Add row and column count information
-                user_rows, user_cols = user_result.shape
-                correct_rows, correct_cols = correct_result.shape
-                count_info = f"<div>Your query yielded {user_rows} rows and {user_cols} columns. The expected result had {correct_rows} rows and {correct_cols} columns.</div>"
-                display(HTML(count_info))
+    def display_feedback(self, is_correct):
+        if is_correct:
+            feedback = "<div style='color: green;'><strong>Correct!</strong> Your query produced the expected result.</div>"
+            self.submit_button.layout.visibility = 'hidden'
+            self.next_button.layout.visibility = 'visible'
+        else:
+            feedback = "<div style='color: red;'><strong>Incorrect.</strong> Please try again.</div>"
+            self.submit_button.layout.visibility = 'visible'
+            self.next_button.layout.visibility = 'hidden'
+        display(HTML(feedback))
 
-                if user_result.equals(correct_result):
-                    feedback = "<div style='color: green;'><strong>Correct!</strong> Your query produced the expected result.</div>"
-                    submit_button.layout.visibility = 'hidden'
-                    next_button.layout.visibility = 'visible'
-                else:
-                    feedback = "<div style='color: red;'><strong>Incorrect.</strong> Please try again.</div>"
-                    submit_button.layout.visibility = 'visible'
-                    next_button.layout.visibility = 'hidden'
-                display(HTML(feedback))
+    def display_error(self, message):
+        self.display_current_question()
+        display(HTML(f"<div style='color: red;'><strong>Error:</strong> {message}</div>"))
 
-                display(HTML("<h4>Your Results (first five):</h4>"))
-                display(user_result.head())
-                display(HTML("<h4>Expected Results (first five):</h4>"))
-                display(correct_result.head())
-
-            except Exception as e:
-                clear_output(wait=True)  # Clear the old output
-                display(HTML(render_table_schemas(get_table_schemas(conn))))  # Display the schema again
-                display(HTML(f"<h3>SQL Question {question_index + 1}:</h3><p>{questions[question_index]}</p>"))  # Display the question
-                display(query_widget)  # Display the query widget
-                display(HTML(f"<div>Error executing your query: {str(e)}</div>"))
-
-        def next_question(button):
-            """
-            Advances to the next question if available.
-            """
-            nonlocal question_index
-            question_index += 1
-            if question_index < len(questions):
-                display_current_question()
-            else:
-                submit_button.layout.visibility = 'hidden'
-                next_button.layout.visibility = 'hidden'
-                retry_button.layout.visibility = 'hidden'
-                display(HTML("<div>All questions completed. Well done!</div>"))
-
-        def retry_question(button):
-            """
-            Resets the interface for the user to retry the current question.
-            """
-            display_current_question()
-
-        text_area = Textarea(value='', placeholder='Type your SQL query here...', description='Query:', layout=Layout(width='60%', height='100px'))
-        submit_button = Button(description="Submit")
-        next_button = Button(description="Next Question", layout=Layout(visibility='hidden'))
-        retry_button = Button(description="Retry", layout=Layout(visibility='hidden'))
-
-        submit_button.on_click(submit_query)
-        next_button.on_click(next_question)
-        retry_button.on_click(retry_question)
-
-        query_widget = VBox([text_area, submit_button, retry_button, next_button])
-
-        display_current_question()
+    def next_question(self, _):
+        self.current_index += 1
+        if self.current_index < len(self.questions):
+            self.display_current_question()
+        else:
+            self.submit_button.layout.visibility = 'hidden'
+            self.next_button.layout.visibility = 'hidden'
+            self.retry_button.layout.visibility = 'hidden'
+            display(HTML("<div>All questions completed. Well done!</div>"))
 
 def sql_select_quiz_from_id(quiz_id="books"):
     if quiz_id == "books":
         db_url = "https://github.com/brendanpshea/database_sql/raw/main/data/sci_fi_books.db"
         json_url = "https://github.com/brendanpshea/database_sql/raw/main/quiz/sql_book_quiz.json"
-    sql_select_quiz_url(db_url,json_url)
-        
-def sql_select_quiz_url(db_url, json_url):
-    """
-    Launches the SQL SELECT quiz using the provided database and JSON URLs.
+    sql_select_quiz_url(db_url, json_url)
 
-    Args:
-        db_url (str): URL of the SQLite database file.
-        json_url (str): URL of the JSON file containing questions and answers.
-    """
+def sql_select_quiz_url(db_url, json_url):
     with tempfile.NamedTemporaryFile(delete=False) as temp_db:
         db_path = temp_db.name
         response = requests.get(db_url)
@@ -222,4 +142,5 @@ def sql_select_quiz_url(db_url, json_url):
     questions = [item['question'] for item in quiz_data]
     answers = [item['answer'] for item in quiz_data]
 
-    sql_select_quiz(db_path, questions, answers)
+    quiz = SQLQuiz(db_path, questions, answers)
+    quiz.display_current_question()
