@@ -165,6 +165,12 @@ def sql_select_quiz_from_id(quiz_id="books"):
     if quiz_id == "books":
         db_url = "https://github.com/brendanpshea/database_sql/raw/main/data/sci_fi_books.db"
         json_url = "https://github.com/brendanpshea/database_sql/raw/main/quiz/sql_book_quiz.json"
+    elif quiz_id == "movies":
+        db_url = "https://github.com/brendanpshea/database_sql/raw/main/data/movie.sqlite"
+        json_url = "https://github.com/brendanpshea/database_sql/raw/main/quiz/sql_movie_quiz.json" 
+    elif quiz_id == "mario":
+        db_url = "https://github.com/brendanpshea/database_sql/raw/main/data/mario_bros_plumbing.db"
+        json_url = "https://github.com/brendanpshea/database_sql/raw/main/quiz/sql_mario_quiz.json"  
     sql_select_quiz_url(db_url, json_url)
 
 def sql_select_quiz_url(db_url, json_url):
